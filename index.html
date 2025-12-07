@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <title>Document</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+      body {
+        font-family: "Prompt", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen antialiased bg-gradient-to-br from-pink-50 to-purple-50"
+  >
+    <!-- LOADING OVERLAY -->
+    <div
+      id="loading-overlay"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+        <!-- Spinner -->
+        <div class="flex justify-center mb-4">
+          <div class="relative w-16 h-16">
+            <div
+              class="absolute inset-0 rounded-full border-4 border-transparent border-t-pink-500 border-r-purple-500 animate-spin"
+            ></div>
+            <div
+              class="absolute inset-2 rounded-full border-4 border-transparent border-b-pink-400 animate-spin"
+              style="animation-direction: reverse; animation-duration: 1.5s"
+            ></div>
+          </div>
+        </div>
+        <p class="text-gray-700 font-semibold">กำลังโหลดข้อมูล...</p>
+        <p class="text-gray-500 text-sm mt-2">กรุณารอสักครู่</p>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <header class="w-full shadow-md sticky top-0 bg-white/80 backdrop-blur border-b border-pink-200 z-40">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Left: Brand -->
+          <div class="flex items-center space-x-3">
+            <button id="nav-toggle-btn" aria-expanded="false" class="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-300">
+              <svg class="w-6 h-6 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            <div class="flex items-center space-x-3">
+              <img id="imguser" class="rounded-full ring-2 ring-pink-300" src="https://static.vecteezy.com/system/resources/previews/019/495/024/non_2x/business-man-boy-avatar-user-person-people-necktie-suit-flat-style-vector.jpg" width="40" height="40" />
+              <div class="">
+                <div class="text-sm font-semibold text-purple-700">การพยาบาลผู้สูงอายุ</div>
+                <div id="user-name" class="text-xs text-gray-500">ผู้ใช้</div>
+              </div>
+              <!-- <div class="text-md font-semibold text-purple-700">การพยาบาลผู้สูงอายุ</div> -->
+            </div>
+          </div>
+
+          <!-- Center: Primary actions (desktop) -->
+          <div class="hidden md:flex md:items-center md:space-x-4 lg:space-x-6">
+            <nav class="flex items-center space-x-4 text-sm font-medium">
+              <a href="#" onclick="pageChange('home-page')" class="text-gray-600 hover:text-pink-600 transition">หน้าแรก</a>
+              <a href="#" onclick="pageChange('quiz-page')" class="text-gray-600 hover:text-purple-600 transition">แบบทดสอบ</a>
+              <a href="#" onclick="pageChange('result-page')" class="text-gray-600 hover:text-pink-600 transition">ผลสอบ</a>
+            </nav>
+
+            <!-- (Dropdown removed per request) -->
+          </div>
+
+          <!-- Right: Controls -->
+          <div class="flex items-center space-x-3">
+            <button id="start-quiz-btn-header" class="hidden md:inline-flex px-4 py-2 rounded-lg text-white font-semibold shadow bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 transition">เริ่มทำแบบทดสอบ</button>
+            <div class="text-right hidden md:block">
+              <!-- <div id="nav-user-display" class="text-sm font-medium text-gray-700">สวัสดี</div>
+              <div class="text-xs text-gray-500">--</div> -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile menu, hidden by default -->
+        <div id="mobile-menu" class="md:hidden hidden mt-2 pb-4">
+          <div class="space-y-3 px-2">
+            <a href="#" onclick="pageChange('home-page')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-pink-50">หน้าแรก</a>
+            <a href="#" onclick="pageChange('quiz-page')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-pink-50">แบบทดสอบ</a>
+            <a href="#" onclick="pageChange('result-page')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-pink-50">ผลสอบ</a>
+
+            <!-- mobile dropdown removed -->
+
+            <div class="pt-3">
+              <button id="start-quiz-btn-mobile" class="w-full px-4 py-2 rounded-lg text-white font-semibold shadow bg-gradient-to-r from-pink-500 to-purple-500">เริ่มทำแบบทดสอบ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+      <!-- HOME PAGE -->
+      <section
+        id="home-page"
+        class="min-h-[calc(100vh-100px)] flex flex-col items-center justify-center"
+      >
+        <h1
+          class="text-xl font-extrabold text-purple-700 drop-shadow-sm text-center"
+        >
+          ยินดีต้อนรับสู่ระบบแบบทดสอบ 🎓
+        </h1>
+
+        <div class=" ">
+          <div class="w-lg bg-yelleow-200 shadow rounded-lg p-6 mt-8">
+            <img
+              src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cXVpenxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60"
+              alt="Quiz Illustration"
+              class="w-full h-64 object-cover rounded-lg mb-4"
+            />
+            <h2 class="text-md font-semibold text-purple-700 mb-2">
+              เริ่มต้นการเรียนรู้กับเรา
+            </h2>
+            <p class="text-gray-700 text-xs">
+              ระบบแบบทดสอบของเราช่วยให้คุณสามารถทดสอบความรู้และพัฒนาทักษะได้อย่างมีประสิทธิภาพ
+              เลือกชุดคำถามที่คุณสนใจและเริ่มทำแบบทดสอบได้ทันที!
+            </p>
+            <div id="list-set-container" class="flex flex-col mt-4 space-y-3">
+              <!-- ชุดคำถามจะถูกเพิ่มที่นี่โดย JavaScript -->
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- QUIZ PAGE -->
+      <section
+        id="quiz-page"
+        class="hidden min-h-[calc(100vh-100px)] flex flex-col space-y-6"
+      >
+        <!-- Card -->
+        <div class="bg-white shadow-xl rounded-xl border border-purple-100 p-6">
+          <h2 class="text-sm font-semibold text-purple-700 mb-4">
+            กรุณาเลือกชุดคำถาม
+          </h2>
+
+          <div
+            class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0"
+          >
+            <select
+              id="set-select"
+              class="p-2 text-sm rounded-lg border border-purple-200 focus:ring-2 focus:ring-pink-300 w-full bg-white"
+            >
+              <option disabled selected>เลือกชุดคำถาม</option>
+            </select>
+
+            <button
+              id="start-quiz-btn"
+              class="px-6 py-3 rounded-lg text-white font-semibold shadow bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 transition w-full md:w-auto"
+            >
+              เริ่มทำแบบทดสอบ
+            </button>
+          </div>
+        </div>
+
+        <!-- QUIZ CONTENT -->
+        <div
+          id="quiz-wrapper"
+          style="display: none"
+          class="bg-white shadow-xl rounded-xl border border-purple-100 p-6 space-y-6"
+        >
+          <div
+            id="quiz-container"
+            class="text-purple-800 text-xl font-semibold"
+          ></div>
+
+          <div id="ans-container" class="space-y-3 text-gray-700 pl-2"></div>
+
+          <div class="flex justify-between pt-4 border-t border-purple-100">
+            <button
+              id="prev-btn"
+              class="px-6 py-3 bg-pink-300 text-white rounded-xl shadow hover:bg-pink-400 transition"
+            >
+              ก่อนหน้า
+            </button>
+
+            <button
+              id="next-btn"
+              class="px-6 py-3 bg-purple-500 text-white rounded-xl shadow hover:bg-purple-600 transition"
+            >
+              ถัดไป
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULT PAGE -->
+      <section
+        id="result-page"
+        class="hidden min-h-[calc(100vh-100px)] flex-col space-y-6 p-6"
+      >
+        <!-- RESULTS SUMMARY (Grid) -->
+         <p class="text-pink-600 text-sm">เลือกชุดคำถามเพื่อดูผลทดสอบ</p>
+        <div id="results-summary-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Summary cards will be inserted here -->
+        </div>
+
+        <!-- RESULT DETAIL -->
+        <div id="result-detail-container" style="display: none;" class="space-y-6">
+          <!-- Score Overview Card -->
+          <div class="bg-gradient-to-r from-pink-100 to-purple-100 rounded-xl border border-purple-200 p-6 shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Score Text -->
+              <div class="flex flex-col justify-center">
+                <p class="text-sm text-gray-600 mb-1">คะแนนรวม</p>
+                <h3 id="detail-score" class="text-4xl font-bold text-purple-700"></h3>
+                <p id="detail-percentage" class="text-lg text-pink-600 font-semibold mt-1"></p>
+              </div>
+              
+              <!-- Chart -->
+              <div class="flex justify-center">
+                <canvas id="result-chart" style="max-width: 200px; max-height: 200px;"></canvas>
+              </div>
+              
+              <!-- Status -->
+              <div class="flex flex-col justify-center">
+                <p id="detail-status" class="text-lg font-bold mb-2"></p>
+                <p class="text-sm text-gray-600 mb-3">จำนวนข้อ</p>
+                <p class="text-xl font-semibold text-gray-800"><span id="detail-total">0</span> ข้อ</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANSWER DETAILS -->
+          <div class="bg-white rounded-xl border border-purple-100 p-6 shadow-lg">
+            <h3 class="text-xl font-bold text-purple-700 mb-6">📝 รายละเอียดคำตอบ</h3>
+            <div id="answer-details-container"
+                class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                <!-- Answer items will be inserted here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- NO DATA MESSAGE -->
+        <div id="no-result-message" class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
+          <p class="text-yellow-700 font-semibold text-lg">⚠️ ยังไม่มีผลการสอบ</p>
+          <p class="text-yellow-600 text-sm mt-2">กรุณาเลือกชุดข้อสอบและทำแบบทดสอบก่อน</p>
+        </div>
+      </section>
+    </main>
+  </body>
+
+  <script src="script.js"></script>
+  <script src="utils.js"></script>
+</html>
