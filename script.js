@@ -7,13 +7,13 @@ let currentQuestionIndex = 0; // ดัชนีของคำถามปั�
 let userAnswers = []; // เก็บคำตอบของผู้ใช้
 let passedSets = new Set(); // เก็บชุดที่ผ่านแล้ว (คะแนน >= 50%)
 let submittedSets = new Set(); // เก็บชุดที่บันทึกไปแล้ว (เพื่อหลีกเลี่ยงการส่งซ้ำ)
-const LIFF_ID = "2000535610-P36M5aWJ"; // LINE LIFF ID
+const LIFF_ID = "2006372130-PYKdNb1r"; // LINE LIFF ID
 let userDisplayName = "";
 let imaageUrl = "";
 
 // ⚙️ การตั้งค่า
 const ALLOW_RESUBMIT = true; // ตั้ง true เพื่ออนุญาตการส่งซ้ำ, false เพื่อป้องกันการส่งซ้ำ
-let userId = "123456666666A"; // สร้าง userId สำหรับผู้ใช้แต่ละคน
+let userId = ""; // สร้าง userId สำหรับผู้ใช้แต่ละคน
 // ปุ่มก่อนหน้าและถัดไป
 const nextBtn = document.getElementById("next-btn");
 const prevBtn = document.getElementById("prev-btn");
@@ -1112,3 +1112,4 @@ function showAnswerDetails(set, userAnswer) {
     container.appendChild(answerCard);
   });
 }
+
