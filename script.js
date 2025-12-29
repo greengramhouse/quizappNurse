@@ -897,7 +897,7 @@ function showResultsSummary() {
       const score = userAnswer && userAnswer.score !== undefined ? userAnswer.score : 0;
       const total = totalQ;
       const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
-      const isPassed = percentage >= 50;
+      const isPassed = percentage >= 70;
 
       const card = document.createElement("div");
       card.className = `bg-white rounded-lg border-2 p-4 shadow-md cursor-pointer transition hover:shadow-lg ${
@@ -1112,5 +1112,6 @@ function showAnswerDetails(set, userAnswer) {
     container.appendChild(answerCard);
   });
 }
+
 
 
