@@ -279,7 +279,7 @@ startQuizBtn.addEventListener("click", () => {
     return;
   }
 
-  // ตรวจสอบว่าชุดนี้ถูกล็อกหรือไม่ (ต้องผ่านชุดก่อนหน้าให้ได้ >= 50%)
+  // ตรวจสอบว่าชุดนี้ถูกล็อกหรือไม่ (ต้องผ่านชุดก่อนหน้าให้ได้ >= 70%)
   if (selectedSetIndex > 0 && !passedSets.has(selectedSetIndex - 1)) {
     const prevSetTitle = setsData[selectedSetIndex - 1].title;
     const prevScore = userAnswers[prevSetTitle]?.score;
@@ -289,7 +289,7 @@ startQuizBtn.addEventListener("click", () => {
       : 0;
     Swal.fire(
       "ชุดนี้ถูกล็อก",
-      `คุณต้องผ่านชุด "${prevSetTitle}" ให้ได้ 50% ก่อน\nคะแนนปัจจุบัน: ${prevPercent}%`,
+      `คุณต้องผ่านชุด "${prevSetTitle}" ให้ได้ 70% ก่อน\nคะแนนปัจจุบัน: ${prevPercent}%`,
       "info"
     );
     return;
@@ -457,7 +457,7 @@ function calculateScore() {
 
   const totalQuestions = setData.questions.length;
   const percentage = Math.round((score / totalQuestions) * 100);
-  const isPassed = score >= Math.ceil(totalQuestions * 0.5); // 50% ขึ้นไป
+  const isPassed = score >= Math.ceil(totalQuestions * 0.7); // 70% ขึ้นไป
 
   // ถ้าผ่าน ให้เพิ่มชุดนี้เข้า passedSets และอัพเดท dropdown
   if (isPassed) {
@@ -467,7 +467,7 @@ function calculateScore() {
 
   const resultMessage = isPassed
     ? `✓ ยินดีด้วย! คุณผ่านแล้ว (${percentage}%)`
-    : `✗ ไม่ผ่าน ต้องได้ 50% ขึ้นไป (${percentage}%)`;
+    : `✗ ไม่ผ่าน ต้องได้ 70% ขึ้นไป (${percentage}%)`;
 
   Swal.fire({
     title: "สรุปคะแนน",
@@ -975,7 +975,7 @@ function loadResultDetail(setIndex) {
   const score = userAnswer.score;
   const total = set.questions.length;
   const percentage = Math.round((score / total) * 100);
-  const isPassed = percentage >= 50;
+  const isPassed = percentage >= 70;
 
   // อัปเดตข้อมูลสรุป
   document.getElementById("detail-score").textContent = `${score}/${total}`;
@@ -1112,4 +1112,5 @@ function showAnswerDetails(set, userAnswer) {
     container.appendChild(answerCard);
   });
 }
+
 
