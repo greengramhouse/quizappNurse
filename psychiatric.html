@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <title>แบบทดสอบการพยาบาลสุขภาพจิตและจิตเวชศาสตร์</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+      body {
+        font-family: "Prompt", sans-serif;
+      }
+      /* Custom scrollbar for better look */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #94a3b8; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; 
+      }
+    </style>
+  </head>
+  <body class="min-h-screen antialiased bg-gradient-to-br from-blue-50 to-teal-50">
+    <!-- LOADING OVERLAY -->
+    <div
+      id="loading-overlay"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+        <!-- Spinner -->
+        <div class="flex justify-center mb-4">
+          <div class="relative w-16 h-16">
+            <div
+              class="absolute inset-0 rounded-full border-4 border-transparent border-t-teal-500 border-r-blue-500 animate-spin"
+            ></div>
+            <div
+              class="absolute inset-2 rounded-full border-4 border-transparent border-b-cyan-400 animate-spin"
+              style="animation-direction: reverse; animation-duration: 1.5s"
+            ></div>
+          </div>
+        </div>
+        <p class="text-gray-700 font-semibold">กำลังโหลดข้อมูล...</p>
+        <p class="text-gray-500 text-sm mt-2">กรุณารอสักครู่</p>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <header class="w-full shadow-md sticky top-0 bg-white/80 backdrop-blur border-b border-teal-100 z-40">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Left: Brand -->
+          <div class="flex items-center space-x-3">
+            <button id="nav-toggle-btn" aria-expanded="false" class="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-300">
+              <svg class="w-6 h-6 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            <div class="flex items-center space-x-3">
+              <img id="imguser" class="rounded-full ring-2 ring-teal-300 object-cover" src="https://static.vecteezy.com/system/resources/previews/019/495/024/non_2x/business-man-boy-avatar-user-person-people-necktie-suit-flat-style-vector.jpg" width="40" height="40" alt="User Avatar" />
+              <div class="">
+                <div class="text-sm font-semibold text-teal-700">การพยาบาลสุขภาพจิตและจิตเวชศาสตร์</div>
+                <div id="user-name" class="text-xs text-gray-500">ผู้ใช้</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Center: Primary actions (desktop) -->
+          <div class="hidden md:flex md:items-center md:space-x-4 lg:space-x-6">
+            <nav class="flex items-center space-x-4 text-sm font-medium">
+              <a href="#" onclick="pageChange('home-page')" class="text-gray-600 hover:text-teal-600 transition">หน้าแรก</a>
+              <a href="#" onclick="pageChange('quiz-page')" class="text-gray-600 hover:text-blue-600 transition">แบบทดสอบ</a>
+              <a href="#" onclick="pageChange('result-page')" class="text-gray-600 hover:text-teal-600 transition">ผลสอบ</a>
+            </nav>
+          </div>
+
+          <!-- Right: Controls -->
+          <div class="flex items-center space-x-3">
+            <button id="start-quiz-btn-header" class="hidden md:inline-flex px-4 py-2 rounded-lg text-white font-semibold shadow bg-gradient-to-r from-teal-500 to-blue-500 hover:opacity-90 transition">เริ่มทำแบบทดสอบ</button>
+          </div>
+        </div>
+
+        <!-- Mobile menu, hidden by default -->
+        <div id="mobile-menu" class="md:hidden hidden mt-2 pb-4">
+          <div class="space-y-3 px-2">
+            <a href="#" onclick="pageChange('home-page')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-teal-50">หน้าแรก</a>
+            <a href="#" onclick="pageChange('quiz-page')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-teal-50">แบบทดสอบ</a>
+            <a href="#" onclick="pageChange('result-page')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-teal-50">ผลสอบ</a>
+            <div class="pt-3">
+              <button id="start-quiz-btn-mobile" class="w-full px-4 py-2 rounded-lg text-white font-semibold shadow bg-gradient-to-r from-teal-500 to-blue-500">เริ่มทำแบบทดสอบ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+      <!-- HOME PAGE -->
+      <section
+        id="home-page"
+        class="min-h-[calc(100vh-100px)] flex flex-col items-center justify-center"
+      >
+        <h1 class="text-2xl font-extrabold text-teal-800 drop-shadow-sm text-center">
+          ยินดีต้อนรับสู่ระบบแบบทดสอบ 🧠
+        </h1>
+        <p class="text-teal-600 mt-2 text-center text-sm md:text-base">วิชาพยาบาลสุขภาพจิต และจิตเวชศาสตร์</p>
+
+        <div class="w-full max-w-2xl">
+          <div class="bg-white shadow-lg rounded-xl p-6 mt-8 border-t-4 border-teal-400">
+            <!-- Mental Health Themed Image -->
+            <img
+              src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+              alt="Mental Health Illustration"
+              class="w-full h-64 object-cover rounded-lg mb-4"
+            />
+            <h2 class="text-lg font-semibold text-teal-700 mb-2">
+              เริ่มต้นการเรียนรู้และทบทวนความรู้
+            </h2>
+            <p class="text-gray-600 text-sm">
+              คุณสามารถเลือกทำแบบทดสอบในหัวข้อต่างๆ ได้ตามความต้องการ โดยไม่จำเป็นต้องเรียงลำดับบท 
+              ระบบจะบันทึกผลการทำแบบทดสอบให้คุณโดยอัตโนมัติ เลือกชุดคำถามที่สนใจแล้วเริ่มได้เลย!
+            </p>
+            <div id="list-set-container" class="flex flex-col mt-6 space-y-3">
+              <!-- ชุดคำถามจะถูกเพิ่มที่นี่โดย JavaScript -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUIZ PAGE -->
+      <section
+        id="quiz-page"
+        class="hidden min-h-[calc(100vh-100px)] flex flex-col space-y-6 max-w-3xl mx-auto w-full"
+      >
+        <!-- Card -->
+        <div class="bg-white shadow-lg rounded-xl border border-teal-100 p-6">
+          <h2 class="text-sm font-semibold text-teal-700 mb-4">
+            กรุณาเลือกหัวข้อการทดสอบ
+          </h2>
+
+          <div
+            class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0"
+          >
+            <select
+              id="set-select"
+              class="p-3 text-sm rounded-lg border border-teal-200 focus:ring-2 focus:ring-teal-400 w-full bg-slate-50 outline-none"
+            >
+              <option disabled selected>เลือกชุดคำถาม...</option>
+            </select>
+
+            <button
+              id="start-quiz-btn"
+              class="px-6 py-3 rounded-lg text-white font-semibold shadow bg-gradient-to-r from-teal-500 to-blue-500 hover:opacity-90 transition w-full md:w-auto flex-shrink-0"
+            >
+              เริ่มทำแบบทดสอบ
+            </button>
+          </div>
+        </div>
+
+        <!-- QUIZ CONTENT -->
+        <div
+          id="quiz-wrapper"
+          style="display: none"
+          class="bg-white shadow-xl rounded-xl border border-blue-100 p-6 space-y-6"
+        >
+          <div
+            id="quiz-container"
+            class="text-teal-800 text-xl font-semibold"
+          ></div>
+
+          <div id="ans-container" class="space-y-3 text-gray-700 pl-2"></div>
+
+          <div class="flex justify-between pt-6 border-t border-gray-100 mt-4">
+            <button
+              id="prev-btn"
+              class="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl shadow hover:bg-slate-300 transition font-medium"
+            >
+              ก่อนหน้า
+            </button>
+
+            <button
+              id="next-btn"
+              class="px-6 py-3 bg-blue-500 text-white rounded-xl shadow hover:bg-blue-600 transition font-medium"
+            >
+              ถัดไป
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULT PAGE -->
+      <section
+        id="result-page"
+        class="hidden min-h-[calc(100vh-100px)] flex-col space-y-6 p-6 max-w-5xl mx-auto w-full"
+      >
+        <!-- RESULTS SUMMARY (Grid) -->
+        <div class="flex justify-between items-end border-b border-teal-100 pb-2">
+           <h2 class="text-xl font-bold text-teal-800">สรุปผลการทำแบบทดสอบ</h2>
+           <p class="text-teal-600 text-sm">เลือกชุดคำถามเพื่อดูรายละเอียด</p>
+        </div>
+         
+        <div id="results-summary-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <!-- Summary cards will be inserted here -->
+        </div>
+
+        <!-- RESULT DETAIL -->
+        <div id="result-detail-container" style="display: none;" class="space-y-6 mt-8">
+          <!-- Score Overview Card -->
+          <div class="bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl border border-teal-200 p-6 shadow-md">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              <!-- Score Text -->
+              <div class="flex flex-col justify-center text-center md:text-left">
+                <p class="text-sm text-gray-600 mb-1">คะแนนรวม</p>
+                <h3 id="detail-score" class="text-5xl font-extrabold text-teal-700"></h3>
+                <p id="detail-percentage" class="text-lg text-blue-600 font-semibold mt-1"></p>
+              </div>
+              
+              <!-- Chart -->
+              <div class="flex justify-center">
+                <canvas id="result-chart" style="max-width: 180px; max-height: 180px;"></canvas>
+              </div>
+              
+              <!-- Status -->
+              <div class="flex flex-col justify-center text-center md:text-right">
+                <p id="detail-status" class="text-xl font-bold mb-2"></p>
+                <p class="text-sm text-gray-600 mb-1">จำนวนคำถามทั้งหมด</p>
+                <p class="text-2xl font-semibold text-gray-800"><span id="detail-total">0</span> ข้อ</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANSWER DETAILS -->
+          <div class="bg-white rounded-xl border border-teal-100 p-6 shadow-md">
+            <h3 class="text-lg font-bold text-teal-700 mb-4 border-b border-gray-100 pb-2">📝 รายละเอียดคำตอบแต่ละข้อ</h3>
+            <div id="answer-details-container"
+                class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                <!-- Answer items will be inserted here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- NO DATA MESSAGE -->
+        <div id="no-result-message" class="bg-orange-50 border border-orange-200 rounded-xl p-8 text-center mt-4">
+          <p class="text-orange-700 font-semibold text-lg">⚠️ ยังไม่มีผลการสอบที่สมบูรณ์</p>
+          <p class="text-orange-600 text-sm mt-2">กรุณาเลือกชุดข้อสอบและทำแบบทดสอบให้ครบทุกข้อก่อน</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- UTILS & MAIN SCRIPT -->
+    <script>
+      /* ==========================================
+         UTILS FUNCTIONS
+         ========================================== */
+      const createDropdown = (options, selectId, defaultText) => {
+        const dropdown = document.getElementById(selectId);
+        
+        // ลบ options เดิมออกก่อน (ยกเว้น default)
+        while (dropdown.options.length > 1) {
+          dropdown.remove(1);
+        }
+
+        options.forEach((option) => {
+          const opt = document.createElement("option");
+          opt.value = option;
+          opt.textContent = option;
+          dropdown.appendChild(opt);
+        });
+      }
+
+      const pageChange = (...pages) => {
+        const allSections = document.querySelectorAll("section");
+        allSections.forEach((section) => {
+          if (pages.includes(section.id)) {
+            section.style.display = "flex";
+            if (section.id === "result-page") {
+              setTimeout(() => {
+                if (typeof initResultPage === 'function') {
+                  initResultPage();
+                }
+              }, 100);
+            }
+          } else {
+            section.style.display = "none";
+          }
+        });
+      };
+
+      /* ==========================================
+         MAIN APP STATE & LOGIC
+         ========================================== */
+      let setsData = []; 
+      let currentSetIndex = null; 
+      let currentQuestionIndex = 0; 
+      let userAnswers = {}; // Changed to Object for better key mapping
+      let submittedSets = new Set(); 
+      const LIFF_ID = "2006372130-PYKdNb1r"; 
+      let userDisplayName = "";
+      let imaageUrl = "";
+      const ALLOW_RESUBMIT = true; 
+      let userId = "guest_user"; // Default if liff fails
+
+      const nextBtn = document.getElementById("next-btn");
+      const prevBtn = document.getElementById("prev-btn");
+      const startQuizBtn = document.getElementById("start-quiz-btn");
+
+      window.addEventListener("load", async () => {
+        await initializeLIFF();
+        await loadQuestions();
+
+        const setSelect = document.getElementById("set-select");
+        if (setSelect) {
+          setSelect.addEventListener("change", () => {
+            if (currentSetIndex !== null) {
+              const wrapper = document.getElementById("quiz-wrapper");
+              const qContainer = document.getElementById("quiz-container");
+              const aContainer = document.getElementById("ans-container");
+              if (wrapper) wrapper.style.display = "none";
+              if (qContainer) qContainer.innerHTML = "";
+              if (aContainer) aContainer.innerHTML = "";
+
+              currentSetIndex = null;
+              currentQuestionIndex = 0;
+            }
+          });
+        }
+
+        try {
+          if (typeof initNavbarToggle === 'function') initNavbarToggle();
+        } catch (e) {
+          console.warn('initNavbarToggle failed:', e);
+        }
+      });
+
+      async function initializeLIFF() {
+        try {
+          await liff.init({ liffId: LIFF_ID });
+          if (!liff.isLoggedIn()) {
+            liff.login();
+          } else {
+            const profile = await liff.getProfile();
+            userId = profile.userId;
+            userDisplayName = profile.displayName;
+            imaageUrl = profile.pictureUrl;
+            document.getElementById("imguser").src = imaageUrl;
+            document.getElementById("user-name").innerText = userDisplayName;
+          }
+        } catch (error) {
+          console.error("LIFF initialization failed:", error);
+          // ทำงานต่อได้แม้ไม่มี LIFF สำหรับการทดสอบ
+        }
+      }
+
+      async function loadQuestions() {
+        try {
+          const loadingOverlay = document.getElementById("loading-overlay");
+          if (loadingOverlay) loadingOverlay.style.display = "flex";
+
+          document.getElementById("quiz-wrapper").style.display = "none";
+          const url = "https://script.google.com/macros/s/AKfycbz5TXC01ZjZveLwhuwna-E0hfoao014V1U44ugKC8NGijJRkRm2asQzDb6WtAYwIn7NkA/exec";
+
+          const formData = new FormData();
+          formData.append("action", "getquiz"); 
+
+          const res = await fetch(url, { method: "POST", body: formData });
+          if (!res.ok) throw new Error("โหลดข้อมูลจาก Apps Script ไม่สำเร็จ");
+          
+          setsData = await res.json();
+          
+          const setOptions = setsData.map((set) => set.title);
+          createDropdown(setOptions, "set-select", "เลือกชุดคำถาม");
+
+          await loadUserPreviousData(userId);
+
+          setTimeout(() => {
+            initResultPage();
+          }, 200);
+
+        } catch (e) {
+          Swal.fire("โหลดคำถามล้มเหลว", e.message, "error");
+          console.error(e);
+        } finally {
+          const loadingOverlay = document.getElementById("loading-overlay");
+          if (loadingOverlay) loadingOverlay.style.display = "none";
+        }
+      }
+
+      async function loadUserPreviousData(userId) {
+        try {
+          const url = "https://script.google.com/macros/s/AKfycbz5TXC01ZjZveLwhuwna-E0hfoao014V1U44ugKC8NGijJRkRm2asQzDb6WtAYwIn7NkA/exec";
+          const formData = new FormData();
+          formData.append("action", "getuserdata"); 
+          formData.append("userId", userId);
+
+          const res = await fetch(url, { method: "POST", body: formData });
+          if (!res.ok) return;
+
+          const data = await res.json();
+
+          if (data && Array.isArray(data)) {
+            data.forEach((record) => {
+              const setTitle = record.setTitle;
+              const score = parseInt(record.score) || 0;
+              const totalQuestions = parseInt(record.totalQuestions) || 1;
+              const savedAnswers = record.answers || []; 
+
+              if (!userAnswers[setTitle]) {
+                userAnswers[setTitle] = {
+                  answers: Array.isArray(savedAnswers) ? [...savedAnswers] : new Array(totalQuestions).fill(null),
+                  score: score,
+                };
+              } else {
+                userAnswers[setTitle].score = score;
+                if (Array.isArray(savedAnswers) && savedAnswers.length > 0) {
+                  userAnswers[setTitle].answers = [...savedAnswers];
+                }
+              }
+
+              const setIndex = setsData.findIndex((s) => s.title === setTitle);
+              if (setIndex >= 0) {
+                submittedSets.add(setIndex);
+              }
+            });
+
+            updateDropdownLockStatus();
+            showListSetTest(); 
+          }
+        } catch (e) {
+          console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลเก่า:", e);
+        }
+      }
+
+      function showListSetTest() {
+        const listsetContainer = document.getElementById("list-set-container");
+        listsetContainer.innerHTML = "";
+
+        setsData.forEach((set, index) => {
+          const title = set.title;
+          const totalQ = set.questions.length;
+          
+          let answeredCount = 0;
+          let showScoreText = "";
+          
+          if (userAnswers[title] && Array.isArray(userAnswers[title].answers)) {
+            answeredCount = userAnswers[title].answers.filter(a => a !== null && a !== undefined).length;
+          }
+          
+          // หากเคยส่งคะแนนแล้ว ให้แสดงคะแนนที่ได้
+          if (submittedSets.has(index) && userAnswers[title] && userAnswers[title].score !== undefined) {
+             showScoreText = `<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-2">คะแนน: ${userAnswers[title].score}/${totalQ}</span>`;
+          }
+
+          const setDiv = document.createElement("div");
+          setDiv.innerHTML = `
+          <div class="bg-white rounded-lg border border-teal-100 p-4 shadow hover:shadow-md transition cursor-pointer flex justify-between items-center group hover:border-teal-300"
+            onclick="document.getElementById('set-select').selectedIndex=${index + 1}; startQuizBtn.click(); pageChange('quiz-page');"
+          >
+            <div>
+                <h3 class="text-md font-bold text-teal-800 group-hover:text-teal-600 transition">${set.title} ${showScoreText}</h3>
+                <p class="text-sm text-gray-500 mt-1">จำนวน ${totalQ} คำถาม (ทำแล้ว ${answeredCount}/${totalQ})</p>
+            </div>
+            <div class="text-teal-400 group-hover:text-teal-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+          </div>
+          `;
+          listsetContainer.appendChild(setDiv);
+        });
+      }
+
+      // 💡 อัปเดตฟังก์ชันนี้ ให้เปิดรับทุกตัวเลือก ไม่มีการล็อก
+      function updateDropdownLockStatus() {
+        const setSelect = document.getElementById("set-select");
+        if (!setSelect) return;
+
+        const options = setSelect.querySelectorAll("option");
+        options.forEach((opt, i) => {
+          if (i === 0) return; 
+          const setIndex = i - 1;
+          
+          // ให้สถานะ disabled เป็น false ทั้งหมด ทำบทไหนก่อนก็ได้
+          opt.disabled = false;
+          opt.textContent = setsData[setIndex].title;
+          
+          // Optional: เติมสัญลักษณ์หากเคยทำเสร็จแล้ว
+          if(submittedSets.has(setIndex)){
+             opt.textContent += " ✓";
+          }
+        });
+      }
+
+      startQuizBtn.addEventListener("click", () => {
+        const setSelect = document.getElementById("set-select");
+        const selectedSetIndex = setSelect.selectedIndex - 1;
+
+        if (selectedSetIndex < 0) {
+          Swal.fire("กรุณาเลือกชุดคำถาม", "คุณต้องเลือกหัวข้อก่อนเริ่มทำแบบทดสอบ", "warning");
+          return;
+        }
+
+        // 💡 นำระบบการเช็คว่าต้องผ่านบทก่อนหน้าออก อนุญาตให้เข้าถึงได้เลย
+        currentSetIndex = selectedSetIndex;
+        currentQuestionIndex = 0;
+
+        const wrapper = document.getElementById("quiz-wrapper");
+        if (wrapper) wrapper.style.display = "block";
+
+        const setTitle = setsData[currentSetIndex].title;
+        const totalQuestions = setsData[currentSetIndex].questions.length;
+
+        if (!userAnswers[setTitle]) {
+          userAnswers[setTitle] = {
+            answers: new Array(totalQuestions).fill(null),
+            score: null,
+          };
+        }
+
+        showQuestion();
+      });
+
+      function showQuestion() {
+        const setData = setsData[currentSetIndex];
+        const question = setData.questions[currentQuestionIndex];
+        const totalQ = setData.questions.length;
+
+        document.getElementById("quiz-container").innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-semibold bg-teal-100 text-teal-700 px-3 py-1 rounded-full">${setData.title}</span>
+            <span class="text-sm text-gray-500 font-medium">ข้อที่ ${currentQuestionIndex + 1} / ${totalQ}</span>
+          </div>
+          <div class="bg-gradient-to-r from-teal-500 to-blue-500 p-6 rounded-xl shadow-md mb-4 relative overflow-hidden">
+            <!-- Decorative circle -->
+            <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white opacity-10"></div>
+            
+            <p class="text-base md:text-lg text-white font-medium relative z-10 leading-relaxed">
+              ${question.q}
+            </p>
+          </div>
+        `;
+
+        let ansContent = `<div class="grid grid-cols-1 gap-3">`;
+
+        question.choices.forEach((option, i) => {
+          ansContent += `
+          <label 
+            for="option${i}" 
+            class="choice-card flex items-center p-4 rounded-xl border-2 border-gray-100 cursor-pointer transition-all duration-200
+                  bg-white shadow-sm hover:shadow hover:border-teal-300 hover:bg-teal-50
+                  peer-checked:bg-gradient-to-r peer-checked:from-teal-50 peer-checked:to-blue-50 peer-checked:border-teal-500"
+          >
+            <input 
+              type="radio" 
+              id="option${i}" 
+              name="answer" 
+              value="${i + 1}"
+              class="peer w-5 h-5 text-teal-600 border-gray-300 cursor-pointer
+                    focus:ring-2 focus:ring-teal-400 focus:ring-offset-1"
+              onchange="highlightAnswer(this)"
+            >
+            <span class="ml-4 text-gray-700 peer-checked:text-teal-800 peer-checked:font-bold transition-all text-sm md:text-base leading-relaxed">
+              ${option}
+            </span>
+          </label>
+          `;
+        });
+
+        ansContent += `</div>`;
+        document.getElementById("ans-container").innerHTML = ansContent;
+
+        const savedAns = userAnswers[setData.title].answers[currentQuestionIndex];
+        if (savedAns !== null && savedAns !== undefined) {
+          let radio = document.querySelector(`input[name="answer"][value="${savedAns}"]`);
+          if (!radio) {
+            const textIndex = question.choices.findIndex((c) => String(c) === String(savedAns));
+            if (textIndex >= 0) {
+              radio = document.getElementById(`option${textIndex}`);
+            }
+          }
+
+          if (radio) {
+            radio.checked = true;
+            highlightAnswer(radio);
+          }
+        }
+
+        updateButtons();
+      }
+
+      function updateButtons() {
+        const total = setsData[currentSetIndex].questions.length;
+        prevBtn.disabled = currentQuestionIndex === 0;
+        
+        if (currentQuestionIndex === 0) {
+            prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            prevBtn.classList.remove('hover:bg-slate-300');
+        } else {
+            prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            prevBtn.classList.add('hover:bg-slate-300');
+        }
+
+        if (currentQuestionIndex === total - 1) {
+          nextBtn.textContent = "ส่งคำตอบ";
+          nextBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+          nextBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+        } else {
+          nextBtn.textContent = "ถัดไป";
+          nextBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+          nextBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }
+      }
+
+      function calculateScore() {
+        const setData = setsData[currentSetIndex];
+        const setTitle = setData.title;
+
+        if (!ALLOW_RESUBMIT && submittedSets.has(currentSetIndex)) {
+          Swal.fire(
+            "บันทึกแล้ว",
+            `ชุด "${setTitle}" เคยบันทึกคะแนนไปแล้ว\nคะแนน: ${userAnswers[setTitle]?.score || 0}/${setData.questions.length}`,
+            "info"
+          );
+          return;
+        }
+
+        const answers = userAnswers[setTitle].answers; 
+        let score = 0;
+
+        setData.questions.forEach((q, i) => {
+          const userAns = answers[i];
+          const correctIndex = q.choices.findIndex((c) => String(c) === String(q.answer));
+          const isMatchText = String(userAns) === String(q.answer);
+          const isMatchIndex = typeof userAns !== "undefined" && userAns !== null && String(userAns) === String(correctIndex + 1);
+
+          if (isMatchText || isMatchIndex) {
+            score++;
+          }
+        });
+
+        userAnswers[setTitle].score = score;
+        const totalQuestions = setData.questions.length;
+        const percentage = Math.round((score / totalQuestions) * 100);
+        // เกณฑ์ผ่านโดยทั่วไป หรืออาจจะเก็บไว้ใช้แสดงสถานะเฉยๆ ก็ได้
+        const isPassed = percentage >= 60; // ปรับเกณฑ์ผ่านการแสดงผลเป็น 60% สำหรับวิชานี้ (หรือปรับตามต้องการ)
+
+        const resultMessage = isPassed
+          ? `✓ ทำได้ดีมาก! (${percentage}%)`
+          : `ทบทวนอีกนิดนะ (${percentage}%)`;
+
+        Swal.fire({
+          title: "สรุปคะแนน",
+          html: `<div style="text-align: center;">
+            <p class="text-lg text-gray-700">${resultMessage}</p>
+            <div class="my-4 py-4 bg-teal-50 rounded-lg border border-teal-100">
+               <span class="text-sm text-gray-500 block mb-1">คะแนนที่คุณได้</span>
+               <span class="text-4xl font-bold text-teal-600">${score}</span>
+               <span class="text-xl text-gray-500">/ ${totalQuestions}</span>
+            </div>
+            <p style="font-size: 0.9em; color: #666; margin-top: 8px;"><i class="fas fa-user"></i> ${userDisplayName || 'ผู้ใช้งาน'}</p>
+          </div>`,
+          icon: isPassed ? "success" : "info",
+          showCancelButton: true,
+          confirmButtonText: "📤 แชร์ผล",
+          cancelButtonText: "ดูรายละเอียดคำตอบ",
+          confirmButtonColor: "#0ea5e9", // light blue
+          cancelButtonColor: "#14b8a6" // teal
+        }).then((result) => {
+          if (result.isConfirmed) {
+            shareResultToLine(setTitle, score, totalQuestions, percentage, isPassed);
+          } else {
+             pageChange('result-page');
+          }
+        });
+
+        const answersToSend = userAnswers[setTitle]?.answers || [];
+        sendScoreToGoogleSheet(setTitle, score, totalQuestions, percentage, isPassed, answersToSend);
+
+        showListSetTest();
+        updateDropdownLockStatus();
+      }
+
+      nextBtn.addEventListener("click", () => {
+        saveAnswer();
+        const qLength = setsData[currentSetIndex].questions.length;
+
+        if (currentQuestionIndex < qLength - 1) {
+          currentQuestionIndex++;
+          showQuestion();
+          return;
+        }
+
+        // ข้อสุดท้าย
+        Swal.fire({
+          title: 'ยืนยันการส่งคำตอบ?',
+          text: "คุณแน่ใจหรือไม่ที่จะส่งคำตอบเพื่อตรวจคะแนน",
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#10b981',
+          cancelButtonColor: '#94a3b8',
+          confirmButtonText: 'ส่งเลย',
+          cancelButtonText: 'กลับไปทบทวน'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            calculateScore();
+          }
+        });
+      });
+
+      prevBtn.addEventListener("click", () => {
+        if (currentQuestionIndex > 0) {
+          saveAnswer(); // บันทึกคำตอบก่อนเปลี่ยนหน้าด้วย
+          currentQuestionIndex--;
+          showQuestion();
+        }
+      });
+
+      function saveAnswer() {
+        const selected = document.querySelector("input[name='answer']:checked");
+        if (!selected) return;
+        const setTitle = setsData[currentSetIndex].title;
+        userAnswers[setTitle].answers[currentQuestionIndex] = selected.value;
+      }
+
+      function highlightAnswer(radioElement) {
+        document.querySelectorAll(".choice-card").forEach((card) => {
+          card.style.background = "white";
+          card.style.borderColor = "#f3f4f6"; // gray-100
+          card.style.boxShadow = "none";
+        });
+
+        const selectedLabel = radioElement.closest("label");
+        if (selectedLabel) {
+          selectedLabel.style.background = "linear-gradient(to right, #f0fdfa, #eff6ff)"; // teal-50 to blue-50
+          selectedLabel.style.borderColor = "#14b8a6"; // teal-500
+          selectedLabel.style.boxShadow = "0 4px 6px -1px rgba(20, 184, 166, 0.1), 0 2px 4px -1px rgba(20, 184, 166, 0.06)";
+        }
+      }
+
+      function initNavbarToggle() {
+        const btn = document.getElementById('nav-toggle-btn');
+        const menu = document.getElementById('mobile-menu');
+        if (btn && menu) {
+          btn.addEventListener('click', () => {
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', String(!expanded));
+            menu.classList.toggle('hidden');
+          });
+        }
+        
+        const startMobile = document.getElementById('start-quiz-btn-mobile');
+        if (startMobile) {
+          startMobile.addEventListener('click', () => {
+            const startDesktop = document.getElementById('start-quiz-btn');
+            if (startDesktop) startDesktop.click();
+            if (menu) {
+              menu.classList.add('hidden');
+              if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
+
+        const startHeader = document.getElementById('start-quiz-btn-header');
+        if (startHeader) {
+          startHeader.addEventListener('click', () => {
+            pageChange('quiz-page');
+            setTimeout(() => {
+                const selectElement = document.getElementById('set-select');
+                selectElement.focus();
+            }, 300);
+          });
+        }
+
+        if (menu) {
+          menu.querySelectorAll('a').forEach((el) => {
+            el.addEventListener('click', () => {
+              menu.classList.add('hidden');
+              if (btn) btn.setAttribute('aria-expanded', 'false');
+            });
+          });
+        }
+
+        window.addEventListener('resize', () => {
+          if (window.innerWidth >= 768 && menu) {
+            menu.classList.add('hidden');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      function buildScoreFlexMessage(setTitle, score, totalQuestions, percentage, isPassed) {
+        const statusColor = isPassed ? "#059669" : "#ea580c";
+        const statusLabel = isPassed ? "✅ ผ่านเกณฑ์" : "⚠️ รอทบทวน";
+        const userInfo = userDisplayName || "ผู้ใช้งาน";
+        const scoreText = `${score} / ${totalQuestions} (${percentage}%)`;
+
+        return {
+          type: "flex",
+          altText: `${userInfo} ทำข้อสอบวิชาสุขภาพจิต "${setTitle}" ได้ ${scoreText}`,
+          contents: {
+            type: "bubble",
+            size: "kilo",
+            body: {
+              type: "box",
+              layout: "vertical",
+              spacing: "md",
+              contents: [
+                {
+                  type: "text",
+                  text: "🧠 ผลทดสอบสุขภาพจิต",
+                  weight: "bold",
+                  size: "md",
+                  color: "#0f766e"
+                },
+                { type: "separator" },
+                {
+                  type: "box",
+                  layout: "vertical",
+                  spacing: "sm",
+                  contents: [
+                    {
+                      type: "box",
+                      layout: "baseline",
+                      spacing: "md",
+                      contents: [
+                        { type: "text", text: "บทเรียน", color: "#94a3b8", size: "sm", flex: 2 },
+                        { type: "text", text: setTitle, wrap: true, color: "#334155", size: "sm", flex: 4, weight: "bold" }
+                      ]
+                    },
+                    {
+                      type: "box",
+                      layout: "baseline",
+                      spacing: "md",
+                      contents: [
+                        { type: "text", text: "คะแนน", color: "#94a3b8", size: "sm", flex: 2 },
+                        { type: "text", text: scoreText, wrap: true, color: "#0ea5e9", size: "md", flex: 4, weight: "bold" }
+                      ]
+                    },
+                    {
+                      type: "box",
+                      layout: "baseline",
+                      spacing: "md",
+                      contents: [
+                        { type: "text", text: "สถานะ", color: "#94a3b8", size: "sm", flex: 2 },
+                        { type: "text", text: statusLabel, wrap: true, color: statusColor, size: "sm", flex: 4, weight: "bold" }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        };
+      }
+
+      async function shareResultToLine(setTitle, score, totalQuestions, percentage, isPassed) {
+        try {
+          const flexMessage = buildScoreFlexMessage(setTitle, score, totalQuestions, percentage, isPassed);
+          await liff.shareTargetPicker([flexMessage], { isMultiple: true });
+        } catch (error) {
+          console.error('❌ เกิดข้อผิดพลาดในการแชร์:', error);
+          Swal.fire('ไม่สามารถแชร์ได้', 'กรุณาลองใหม่อีกครั้ง หรือเข้าสู่ระบบ LINE', 'error');
+        }
+      }
+
+      async function sendScoreToGoogleSheet(setTitle, score, totalQuestions, percentage, isPassed, answers) {
+        try {
+          const url = "https://script.google.com/macros/s/AKfycbz5TXC01ZjZveLwhuwna-E0hfoao014V1U44ugKC8NGijJRkRm2asQzDb6WtAYwIn7NkA/exec";
+          const formData = new FormData();
+          formData.append("action", "savescore"); 
+          formData.append("userId", userId);
+          formData.append("setTitle", setTitle);
+          formData.append("score", score);
+          formData.append("totalQuestions", totalQuestions);
+          formData.append("percentage", percentage);
+          formData.append("isPassed", isPassed);
+          
+          try {
+            formData.append("answers", JSON.stringify(answers || []));
+          } catch (e) {
+            formData.append("answers", "[]");
+          }
+          formData.append("timestamp", new Date().toISOString());
+
+          const res = await fetch(url, { method: "POST", body: formData });
+          if (res.ok) {
+              submittedSets.add(currentSetIndex);
+          }
+        } catch (e) {
+          console.error("❌ เกิดข้อผิดพลาดในการส่งคะแนน:", e);
+        }
+      }
+
+      /* ==========================================
+         RESULT PAGE FUNCTIONS
+         ========================================== */
+      let resultChart = null;
+
+      function initResultPage() {
+        showResultsSummary();
+      }
+
+      function showResultsSummary() {
+        const gridContainer = document.getElementById("results-summary-grid");
+        gridContainer.innerHTML = "";
+        let firstSetWithData = null;
+
+        setsData.forEach((set, index) => {
+          const setTitle = set.title;
+          const userAnswer = userAnswers[setTitle];
+          const answersArr = userAnswer && Array.isArray(userAnswer.answers) ? userAnswer.answers : [];
+          const totalQ = set.questions.length;
+          const answeredCount = answersArr.filter(a => a !== null && a !== undefined && String(a).trim() !== "").length;
+          
+          const isCompleted = answeredCount === totalQ;
+          const wasSubmitted = submittedSets.has(index);
+          const allowView = isCompleted || wasSubmitted;
+
+          if (allowView && firstSetWithData === null) {
+            firstSetWithData = index;
+          }
+
+          if (allowView) {
+            const score = userAnswer && userAnswer.score !== undefined ? userAnswer.score : 0;
+            const percentage = totalQ > 0 ? Math.round((score / totalQ) * 100) : 0;
+            const isPassed = percentage >= 60; // ปรับเกณฑ์แสดงสีในหน้าผลลัพธ์
+
+            const card = document.createElement("div");
+            card.className = `bg-white rounded-xl border-l-4 p-4 shadow-sm cursor-pointer transition hover:shadow-md ${
+              isPassed ? "border-teal-500" : "border-orange-400"
+            }`;
+
+            card.innerHTML = `
+              <div class="flex items-start justify-between">
+                <div>
+                  <h6 class="font-bold text-gray-800 text-sm mb-1">${setTitle}</h6>
+                  <p class="text-xs text-gray-500 mb-1">จำนวน ${totalQ} ข้อ</p>
+                  <p class="text-sm font-medium"><span class="${isPassed ? "text-teal-600" : "text-orange-600"}">ได้ ${score} คะแนน</span> (${percentage}%)</p>
+                </div>
+                <div class="text-xl bg-slate-50 p-2 rounded-full">${isPassed ? "🌟" : "📖"}</div>
+              </div>
+            `;
+            card.addEventListener("click", () => loadResultDetail(index));
+            gridContainer.appendChild(card);
+          } else {
+            const lockedCard = document.createElement("div");
+            lockedCard.className = "bg-gray-50 rounded-xl border border-gray-200 p-4 shadow-sm opacity-75";
+            lockedCard.innerHTML = `
+              <h6 class="font-bold text-gray-600 text-sm mb-1">${setTitle}</h6>
+              <div class="mt-2 text-xs text-gray-500 flex items-center">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                 </svg>
+                 ทำไปแล้ว ${answeredCount}/${totalQ} ข้อ
+              </div>
+            `;
+            lockedCard.addEventListener("click", () => {
+              Swal.fire("ย้งทำไม่เสร็จ", `บทเรียนนี้มี ${totalQ} ข้อ คุณทำไปแล้ว ${answeredCount} ข้อ กรุณาทำให้ครบก่อนดูเฉลยครับ`, "info");
+            });
+            gridContainer.appendChild(lockedCard);
+          }
+        });
+
+        if (firstSetWithData !== null) {
+          loadResultDetail(firstSetWithData);
+        } else {
+          document.getElementById("no-result-message").style.display = "block";
+          document.getElementById("result-detail-container").style.display = "none";
+        }
+      }
+
+      function loadResultDetail(setIndex) {
+        const set = setsData[setIndex];
+        const setTitle = set.title;
+        const userAnswer = userAnswers[setTitle];
+        const detailContainer = document.getElementById("result-detail-container");
+        const noResultMessage = document.getElementById("no-result-message");
+
+        const answersArr = userAnswer && Array.isArray(userAnswer.answers) ? userAnswer.answers : [];
+        const totalQ = set.questions.length;
+        const answeredCount = answersArr.filter(a => a !== null && a !== undefined && String(a).trim() !== "").length;
+        
+        if (answeredCount !== totalQ && !submittedSets.has(setIndex)) return;
+
+        noResultMessage.style.display = "none";
+        detailContainer.style.display = "block";
+
+        const score = userAnswer.score || 0;
+        const percentage = Math.round((score / totalQ) * 100);
+        const isPassed = percentage >= 60;
+
+        document.getElementById("detail-score").textContent = score;
+        document.getElementById("detail-percentage").textContent = `คิดเป็น ${percentage}%`;
+        document.getElementById("detail-total").textContent = totalQ;
+        
+        const statusEl = document.getElementById("detail-status");
+        if (isPassed) {
+          statusEl.innerHTML = "✅ ผ่านเกณฑ์";
+          statusEl.className = "text-lg font-bold text-teal-600 mb-2";
+        } else {
+          statusEl.innerHTML = "⚠️ ควรทบทวนเพิ่ม";
+          statusEl.className = "text-lg font-bold text-orange-600 mb-2";
+        }
+
+        renderResultChart(score, totalQ - score);
+        showAnswerDetails(set, userAnswer);
+      }
+
+      function renderResultChart(correct, incorrect) {
+        const ctx = document.getElementById("result-chart").getContext("2d");
+        if (resultChart) resultChart.destroy();
+
+        resultChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["ถูกต้อง", "ควรปรับปรุง"],
+            datasets: [{
+              data: [correct, incorrect],
+              backgroundColor: ["#14b8a6", "#fbd38d"], // teal-500, orange-300
+              borderColor: ["#ffffff", "#ffffff"],
+              borderWidth: 2,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '70%',
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { font: { family: "'Prompt', sans-serif", size: 12 }, padding: 15 },
+              },
+            },
+          },
+        });
+      }
+
+      function showAnswerDetails(set, userAnswer) {
+        const container = document.getElementById("answer-details-container");
+        container.innerHTML = "";
+
+        set.questions.forEach((question, index) => {
+          const choices = question.choices || [];
+          const rawUser = userAnswer.answers[index];
+          const rawCorrect = question.answer;
+
+          const userIdx = Number(rawUser);
+          const correctIdx = Number(rawCorrect);
+
+          const userText = Number.isInteger(userIdx) && userIdx > 0 && userIdx <= choices.length
+              ? choices[userIdx - 1]
+              : (rawUser !== undefined && rawUser !== null ? String(rawUser).trim() : "");
+
+          const correctText = Number.isInteger(correctIdx) && correctIdx > 0 && correctIdx <= choices.length
+              ? choices[correctIdx - 1]
+              : (rawCorrect !== undefined && rawCorrect !== null ? String(rawCorrect).trim() : "");
+
+          let isCorrect = false;
+          if (Number.isInteger(userIdx) && Number.isInteger(correctIdx) && !Number.isNaN(userIdx) && !Number.isNaN(correctIdx)) {
+            isCorrect = userIdx === correctIdx;
+          } else {
+            isCorrect = (userText || "").toString().trim() === (correctText || "").toString().trim() && userText !== "";
+          }
+
+          const answerCard = document.createElement("div");
+          answerCard.className = `p-4 rounded-lg border border-gray-100 ${
+            isCorrect ? "bg-teal-50/50" : "bg-red-50/50"
+          }`;
+
+          const questionTitle = `<div class="font-semibold text-sm text-gray-800 mb-3">ข้อที่ ${index + 1}. ${question.q || question.question || "คำถาม"}</div>`;
+
+          const answerSection = `
+            <div class="space-y-2 text-sm pl-4 border-l-2 ${isCorrect ? 'border-teal-400' : 'border-red-400'}">
+              <div class="flex flex-col sm:flex-row sm:items-baseline gap-1">
+                <span class="text-gray-500 w-24 flex-shrink-0">คำตอบของคุณ:</span>
+                <span class="${isCorrect ? "text-teal-700 font-semibold" : "text-red-600 font-semibold"}">
+                  ${userText || "- ไม่ได้ตอบ -"} ${isCorrect ? '✓' : '✗'}
+                </span>
+              </div>
+              ${!isCorrect ? `
+              <div class="flex flex-col sm:flex-row sm:items-baseline gap-1 mt-1">
+                <span class="text-gray-500 w-24 flex-shrink-0">เฉลยที่ถูกต้อง:</span>
+                <span class="text-blue-600 font-medium">${correctText}</span>
+              </div>
+              ` : ''}
+            </div>
+          `;
+
+          answerCard.innerHTML = questionTitle + answerSection;
+          container.appendChild(answerCard);
+        });
+      }
+    </script>
+  </body>
+</html>
